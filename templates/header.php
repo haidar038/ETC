@@ -1,6 +1,4 @@
 <?php
-ob_start();
-session_start();
 include_once __DIR__ . '/../config/config.php';
 ?>
 
