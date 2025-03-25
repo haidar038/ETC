@@ -5,7 +5,7 @@ session_start();
 
 // Pastikan hanya admin yang dapat mengakses halaman ini
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] != 'admin') {
-    header("Location: ../login.php");
+    header("Location: admin_login.php");
     exit();
 }
 

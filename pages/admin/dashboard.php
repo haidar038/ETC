@@ -5,7 +5,7 @@ include '../../templates/header.php';
 
 // Pastikan hanya admin yang dapat mengakses halaman ini
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] != 'admin') {
-    header("Location: ../login.php");
+    header("Location: admin_login.php");
     exit();
 }
 
@@ -20,12 +20,12 @@ $totalTransactionsResult = $conn->query("SELECT COUNT(*) as total FROM transacti
 $totalTransactions = $totalTransactionsResult->fetch_assoc()['total'];
 ?>
 
-<h2>Dashboard Admin</h2>
+<h2 class="fw-bold text-primary mb-4">Dashboard Admin</h2>
 
 <div class="row">
     <div class="col-md-4">
         <div class="card text-white bg-primary mb-3">
-            <div class="card-header">Total Users</div>
+            <div class="card-header"><i class="bi bi-people-fill"></i> Total Users</div>
             <div class="card-body">
                 <h5 class="card-title"><?= $totalUsers; ?></h5>
             </div>
@@ -33,7 +33,7 @@ $totalTransactions = $totalTransactionsResult->fetch_assoc()['total'];
     </div>
     <div class="col-md-4">
         <div class="card text-white bg-warning mb-3">
-            <div class="card-header">Topup Pending</div>
+            <div class="card-header"><i class="bi bi-hourglass-split"></i> Topup Pending</div>
             <div class="card-body">
                 <h5 class="card-title"><?= $pendingTopup; ?></h5>
             </div>
@@ -41,7 +41,7 @@ $totalTransactions = $totalTransactionsResult->fetch_assoc()['total'];
     </div>
     <div class="col-md-4">
         <div class="card text-white bg-success mb-3">
-            <div class="card-header">Total Transaksi</div>
+            <div class="card-header"><i class="bi bi-cash-stack"></i> Total Transaksi</div>
             <div class="card-body">
                 <h5 class="card-title"><?= $totalTransactions; ?></h5>
             </div>
@@ -51,7 +51,7 @@ $totalTransactions = $totalTransactionsResult->fetch_assoc()['total'];
 
 <div class="list-group">
     <a href="manage_users.php" class="list-group-item list-group-item-action">Kelola Users</a>
-    <a href="verify_topup.php" class="list-group-item list-group-item-action">Verifikasi Topup</a>
+    <a href="topup.php" class="list-group-item list-group-item-action">Topup</a>
     <a href="transaction_logs.php" class="list-group-item list-group-item-action">Riwayat Transaksi</a>
 </div>
 

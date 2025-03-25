@@ -1,0 +1,4 @@
+etchip.sql
+.env
+/vendor
+composer.*

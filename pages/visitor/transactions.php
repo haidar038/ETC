@@ -20,33 +20,35 @@ $sql = "SELECT t.*, u.name AS tenant_name
 $result = $conn->query($sql);
 ?>
 
-<h2>Transaksi / Pembelian</h2>
+<a href="dashboard.php" class="btn btn-sm btn-secondary mb-4">&larr; Kembali</a>
+
+<h2 class="fw-bold text-primary mb-4">Transaksi / Pembelian</h2>
 
 <?php if ($result->num_rows > 0): ?>
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>ID Transaksi</th>
-            <th>Tenant</th>
-            <th>Nominal (poin)</th>
-            <th>Status</th>
-            <th>Tanggal</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php while ($row = $result->fetch_assoc()): ?>
-        <tr>
-            <td><?= $row['id']; ?></td>
-            <td><?= $row['tenant_name'] ? $row['tenant_name'] : '-'; ?></td>
-            <td><?= number_format($row['nominal'], 0, ',', '.'); ?></td>
-            <td><?= ucfirst($row['status']); ?></td>
-            <td><?= $row['transaction_date']; ?></td>
-        </tr>
-        <?php endwhile; ?>
-    </tbody>
-</table>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID Transaksi</th>
+                <th>Tenant</th>
+                <th>Nominal (poin)</th>
+                <th>Status</th>
+                <th>Tanggal</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php while ($row = $result->fetch_assoc()): ?>
+                <tr>
+                    <td><?= $row['id']; ?></td>
+                    <td><?= $row['tenant_name'] ? $row['tenant_name'] : '-'; ?></td>
+                    <td><?= number_format($row['nominal'], 0, ',', '.'); ?></td>
+                    <td><?= ucfirst($row['status']); ?></td>
+                    <td><?= $row['transaction_date']; ?></td>
+                </tr>
+            <?php endwhile; ?>
+        </tbody>
+    </table>
 <?php else: ?>
-<div class="alert alert-info">Belum ada transaksi pembelian.</div>
+    <div class="alert alert-info">Belum ada transaksi pembelian.</div>
 <?php endif; ?>
 
 <?php include '../../templates/footer.php'; ?>

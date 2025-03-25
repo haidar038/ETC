@@ -5,7 +5,7 @@ include '../../templates/header.php';
 
 // Pastikan hanya admin yang dapat mengakses halaman ini
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] != 'admin') {
-    header("Location: ../login.php");
+    header("Location: admin_login.php");
     exit();
 }
 
@@ -27,13 +27,13 @@ $result = $conn->query($sql);
     </thead>
     <tbody>
         <?php while ($row = $result->fetch_assoc()): ?>
-        <tr>
-            <td><?= $row['id']; ?></td>
-            <td><?= $row['name']; ?></td>
-            <td><?= $row['email']; ?></td>
-            <td><?= ucfirst($row['user_type']); ?></td>
-            <td><?= $row['created_at']; ?></td>
-        </tr>
+            <tr>
+                <td><?= $row['id']; ?></td>
+                <td><?= $row['name']; ?></td>
+                <td><?= $row['email']; ?></td>
+                <td><?= ucfirst($row['user_type']); ?></td>
+                <td><?= $row['created_at']; ?></td>
+            </tr>
         <?php endwhile; ?>
     </tbody>
 </table>
