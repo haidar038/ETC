@@ -1,26 +1,19 @@
 <?php
-require_once __DIR__ . '/../vendor/autoload.php';
 // config/config.php
 
-// Memuat file .env
+// Muat autoload Composer (pastikan file vendor/autoload.php ada)
+require_once __DIR__ . '/../vendor/autoload.php';
+
+// Muat file .env dari root project
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->load();
 
-// Definisikan konstanta dari variabel env
-define('BASE_URL', $_ENV['BASE_URL']);
+// Definisikan BASE_URL dari environment, fallback jika tidak diset
+define('BASE_URL', $_ENV['BASE_URL'] ?? 'http://localhost:8085/');
 
-// Pengaturan database
-define('DB_HOST', $_ENV['DB_HOST']);
-define('DB_USER', $_ENV['DB_USER']);
-define('DB_PASS', $_ENV['DB_PASS']);
-define('DB_NAME', $_ENV['DB_NAME']);
-define('DB_CHARSET', $_ENV['DB_CHARSET']);
-
-// Pengaturan lain, misalnya secret key
-define('SECRET_KEY', $_ENV['SECRET_KEY']);
-
+// Pengaturan session
 ini_set('session.cookie_http_only', 1);
 ini_set('session.cookie_secure', 1);
 ini_set('session.use_only_cookies', 1);
-ini_set('session.cookie_samesite', 'Strict');
+ini_set('session.cookie_lifetime', 0);
 session_start();
