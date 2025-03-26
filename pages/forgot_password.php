@@ -3,13 +3,18 @@ include '../config/config.php';
 include '../config/database.php';
 include '../templates/header.php';
 
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
     if (!$email) {
-        $error = "Email tidak valid.";
+        echo "<div class='alert alert-danger'>Email tidak valid.</div>";
     } else {
         // Cari user berdasarkan email
-        $stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt = $conn->prepare("SELECT id, name FROM users WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -23,11 +28,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $stmtUpdate->execute();
             $stmtUpdate->close();
 
-            // Siapkan link reset (sesuaikan dengan URL domain Anda)
-            $resetLink = "http://localhost:8085/pages/reset_password.php?token=" . $reset_token;
+            // Siapkan link reset password (gunakan BASE_URL)
+            $resetLink = BASE_URL . "pages/reset_password.php?token=" . $reset_token;
 
-            // (Dalam implementasi nyata, kirim email ke pengguna dengan link reset)
-            echo "<div class='alert alert-success'>Link reset password telah dikirim ke email Anda (contoh link: <a href='$resetLink'>$resetLink</a>).</div>";
+            // Konfigurasi PHPMailer
+            $mail = new PHPMailer(true);
+            try {
+                $mail->isSMTP();
+                $mail->Host       = 'smtp.hostinger.com';
+                $mail->SMTPAuth   = true;
+                $mail->Username   = 'official@krsp.cloud'; // Ganti dengan email Anda
+                $mail->Password   = 'Metaverse@2025'; // Ganti dengan password email Anda
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                $mail->Port       = 587;
+
+                $mail->setFrom('official@krsp.cloud', 'Event Territory Chip');
+                $mail->addAddress($email, $user['name']);
+                $mail->isHTML(true);
+                $mail->Subject = 'Reset Password Anda';
+                $mail->Body    = "<p>Halo " . $user['name'] . ",</p>
+                                  <p>Anda telah meminta reset password. Silakan klik link berikut untuk mengatur ulang password Anda:</p>
+                                  <p><a href='$resetLink'>$resetLink</a></p>
+                                  <p>Link ini akan berlaku selama 1 jam.</p>";
+                $mail->AltBody = "Halo " . $user['name'] . ",\n\nAnda telah meminta reset password. Silakan buka link berikut untuk mengatur ulang password Anda: $resetLink\n\nLink ini akan berlaku selama 1 jam.";
+                $mail->send();
+                echo "<div class='alert alert-success'>Link reset password telah dikirim ke email Anda.</div>";
+            } catch (Exception $e) {
+                echo "<div class='alert alert-warning'>Gagal mengirim email reset password. Error: {$mail->ErrorInfo}</div>";
+            }
         } else {
             echo "<div class='alert alert-danger'>Email tidak ditemukan.</div>";
         }
@@ -48,6 +76,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </form>
     </div>
 </div>
-
 
 <?php include '../templates/footer.php'; ?>

@@ -4,6 +4,12 @@ include '../config/database.php';
 include '../templates/header.php';
 include '../includes/functions.php'; // Pastikan fungsi generateQRToken() tersedia
 
+// Sertakan autoload Composer untuk PHPMailer
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name      = $conn->real_escape_string($_POST['name']);
     $email     = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
@@ -22,23 +28,48 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $catalog_token = generateQRToken(10); // Misalnya, token sepanjang 10 karakter
         }
 
-        // Generate email verification token
+        // Generate token verifikasi email
         $email_verification_token = bin2hex(random_bytes(16));
-        // confirmed_status = 0 berarti belum terverifikasi
-        $confirmed_status = 0;
+        $confirmed_status = 0; // Belum terverifikasi
 
         $stmt = $conn->prepare("INSERT INTO users (name, email, password, user_type, catalog_token, confirmed_status, email_verification_token) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssssds", $name, $email, $passwordHash, $user_type, $catalog_token, $confirmed_status, $email_verification_token);
-        // Catatan: Tipe binding "d" dipakai untuk confirmed_status jika kita pakai tipe numerik; 
-        // jika seharusnya string, gunakan "s". Di sini gunakan "d" untuk angka 0.
+        // Format binding: name (s), email (s), password (s), user_type (s), catalog_token (s), confirmed_status (i), email_verification_token (s)
+        $stmt->bind_param("sssssis", $name, $email, $passwordHash, $user_type, $catalog_token, $confirmed_status, $email_verification_token);
         if ($stmt->execute()) {
-            // Buat link verifikasi (ganti yourdomain.com dengan domain Anda)
-            $verificationLink = "http://yourdomain.com/pages/verify_email.php?token=" . $email_verification_token;
+            // Buat link verifikasi, ganti BASE_URL sesuai dengan lingkungan produksi Anda
+            $verificationLink = BASE_URL . "pages/verify_email.php?token=" . $email_verification_token;
 
-            // Pada implementasi nyata, kirim email verifikasi ke pengguna
-            echo "<div class='alert alert-success mb-3'>
-                    Registrasi berhasil. Silakan cek email Anda untuk konfirmasi (contoh link: <a href='$verificationLink'>$verificationLink</a>).
-                  </div>";
+            // Konfigurasi PHPMailer
+            $mail = new PHPMailer(true);
+            try {
+                // Set pengaturan SMTP
+                $mail->isSMTP();
+                $mail->Host       = 'smtp.hostinger.com'; // Ganti dengan host SMTP dari Hostinger
+                $mail->SMTPAuth   = true;
+                $mail->Username   = 'official@krsp.cloud'; // Ganti dengan email Anda
+                $mail->Password   = 'Metaverse@2025'; // Ganti dengan password email Anda
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // atau ENCRYPTION_SMTPS untuk SSL
+                $mail->Port       = 587; // Port 465 untuk SSL
+
+                // Atur pengirim dan penerima
+                $mail->setFrom('official@krsp.cloud', 'Event Territory Chip');
+                $mail->addAddress($email, $name);
+
+                // Konten email
+                $mail->isHTML(true);
+                $mail->Subject = 'Konfirmasi Email Anda';
+                $mail->Body    = "<p>Halo $name,</p>
+                                  <p>Terima kasih telah mendaftar. Silakan klik link berikut untuk mengkonfirmasi email Anda:</p>
+                                  <p><a href='$verificationLink'>$verificationLink</a></p>
+                                  <p>Jika link tidak bisa diklik, salin URL berikut ke browser Anda:</p>
+                                  <p>$verificationLink</p>";
+                $mail->AltBody = "Halo $name,\n\nTerima kasih telah mendaftar. Silakan buka link berikut untuk mengkonfirmasi email Anda: $verificationLink";
+                $mail->send();
+
+                echo "<div class='alert alert-success mb-3'>Registrasi berhasil. Silakan cek email Anda untuk konfirmasi.</div>";
+            } catch (Exception $e) {
+                echo "<div class='alert alert-warning mb-3'>Registrasi berhasil, tetapi pengiriman email verifikasi gagal. Error: {$mail->ErrorInfo}</div>";
+            }
         } else {
             echo "<div class='alert alert-danger mb-3'>Error: " . $stmt->error . "</div>";
         }

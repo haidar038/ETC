@@ -1,5 +1,4 @@
 <?php
-session_start();
 include '../config/config.php';
 include '../config/database.php';
 include '../templates/header.php';
