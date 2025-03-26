@@ -293,7 +293,7 @@ require_once '../templates/header.php';
             </div>
         </div>
 
-        <div class="text-center my-5">
+        <div class="text-center mt-5">
             <a href="{{ url_for('main.index') }}" class="btn btn-outline-primary btn-lg">
                 <i class="fas fa-home me-2"></i>Kembali ke Beranda
             </a>

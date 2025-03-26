@@ -118,7 +118,7 @@ require_once '../templates/header.php';
             </div> -->
     </div>
 
-    <div class="my-5 text-center">
+    <div class="mt-5 text-center">
         <h4 class="fw-bold">Ikuti Kami</h4>
         <div class="mt-3">
             <a href="#" class="btn btn-outline-primary me-2">
@@ -135,7 +135,6 @@ require_once '../templates/header.php';
             </a>
         </div>
     </div>
-</div>
 </div>
 
 <?php

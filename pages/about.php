@@ -115,7 +115,7 @@ require_once '../templates/header.php';
             </div>
         </div>
 
-        <div class="text-center my-5">
+        <div class="text-center mt-5">
             <a href="how_it_works.php" class="btn btn-primary btn-lg me-2">
                 <i class="fas fa-info-circle me-2"></i>Cara Kerja
             </a>
