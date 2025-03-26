@@ -124,7 +124,8 @@ if (isset($_GET['export'])) {
             }
         }
 
-        $pdf = new TransactionPDF('L');
+        $pdf = new TransactionPDF('P', 'mm', 'A4');
+        $pdf->SetTitle('Transaction Report');
         $pdf->AliasNbPages();
         $pdf->AddPage();
 
