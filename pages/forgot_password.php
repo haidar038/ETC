@@ -35,15 +35,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $mail = new PHPMailer(true);
             try {
                 $mail->isSMTP();
-                $mail->Host       = 'smtp.hostinger.com';
+                $mail->Host       = $_ENV['SMTP_HOST']; // Ganti dengan host SMTP dari Hostinger
                 $mail->SMTPAuth   = true;
-                $mail->Username   = 'official@krsp.cloud'; // Ganti dengan email Anda
-                $mail->Password   = 'Metaverse@2025'; // Ganti dengan password email Anda
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                $mail->Port       = 587;
+                $mail->Username   = $_ENV['MAIL_USER']; // Ganti dengan email Anda
+                $mail->Password   = $_ENV['MAIL_PASS']; // Ganti dengan password email Anda
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // atau ENCRYPTION_SMTPS untuk SSL
+                $mail->Port       = $_ENV['SMTP_PORT'];
 
-                $mail->setFrom('official@krsp.cloud', 'Event Territory Chip');
-                $mail->addAddress($email, $user['name']);
+                // Atur pengirim dan penerima
+                $mail->setFrom($_ENV['MAIL_USER'], 'Event Territory Chip');
+                $mail->addAddress($email, $name);
+
+                // Email Content
                 $mail->isHTML(true);
                 $mail->Subject = 'Reset Password Anda';
                 $mail->Body    = "<p>Halo " . $user['name'] . ",</p>

@@ -91,7 +91,6 @@ include_once __DIR__ . '/../config/config.php';
                                     <li><a class="dropdown-item" href="<?= BASE_URL; ?>pages/admin/dashboard.php">Dashboard</a></li>
                                 <?php elseif (isset($_SESSION['user_type']) && $_SESSION['user_type'] == 'visitor'): ?>
                                     <li><a class="dropdown-item" href="<?= BASE_URL; ?>pages/visitor/profile.php">Profile</a></li>
-                                    <li><a class="dropdown-item" href="<?= BASE_URL; ?>pages/visitor/balance.php">Balance</a></li>
                                 <?php elseif (isset($_SESSION['user_type']) && $_SESSION['user_type'] == 'tenant'): ?>
                                     <li><a class="dropdown-item" href="<?= BASE_URL; ?>pages/tenant/profile.php">Profile</a></li>
                                 <?php endif; ?>

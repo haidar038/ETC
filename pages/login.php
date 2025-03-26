@@ -120,6 +120,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <button type="submit" class="btn btn-primary w-100">Masuk</button>
         </form>
         <p class="mt-3 text-center">Belum punya akun? <a class="link-primary fw-bold" href="register.php">Daftar Sekarang</a></p>
+        <div class="text-center">
+            <a class="link-primary fw-bold link-underline-opacity-0" href="/pages/admin/admin_login.php">Login Sebagai Admin</a>
+        </div>
 
         <script>
             document.getElementById('togglePassword').addEventListener('click', function() {
