@@ -14,6 +14,4 @@ define('BASE_URL', $_ENV['BASE_URL'] ?? 'http://localhost:8085/');
 // Pengaturan session
 ini_set('session.cookie_http_only', 1);
 ini_set('session.cookie_secure', 1);
-ini_set('session.use_only_cookies', 1);
-ini_set('session.cookie_lifetime', 0);
 session_start();

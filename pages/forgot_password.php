@@ -35,18 +35,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $mail = new PHPMailer(true);
             try {
                 $mail->isSMTP();
-                $mail->Host       = $_ENV['SMTP_HOST']; // Ganti dengan host SMTP dari Hostinger
+                $mail->Host       = $_ENV['SMTP_HOST'];
                 $mail->SMTPAuth   = true;
-                $mail->Username   = $_ENV['MAIL_USER']; // Ganti dengan email Anda
-                $mail->Password   = $_ENV['MAIL_PASS']; // Ganti dengan password email Anda
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // atau ENCRYPTION_SMTPS untuk SSL
+                $mail->Username   = $_ENV['SMTP_USER'];
+                $mail->Password   = $_ENV['SMTP_PASS'];
+                $mail->SMTPSecure = $_ENV['SMTP_SECURE'] ?? PHPMailer::ENCRYPTION_STARTTLS;
                 $mail->Port       = $_ENV['SMTP_PORT'];
 
-                // Atur pengirim dan penerima
-                $mail->setFrom($_ENV['MAIL_USER'], 'Event Territory Chip');
-                $mail->addAddress($email, $name);
+                $mail->setFrom('official@krsp.cloud', 'Event Territory Chip');
+                $mail->addAddress($email, $user['name']);
 
-                // Email Content
                 $mail->isHTML(true);
                 $mail->Subject = 'Reset Password Anda';
                 $mail->Body    = "<p>Halo " . $user['name'] . ",</p>
