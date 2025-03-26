@@ -53,6 +53,7 @@ $totalTransactions = $totalTransactionsResult->fetch_assoc()['total'];
     <a href="manage_users.php" class="list-group-item list-group-item-action">Kelola Users</a>
     <a href="topup.php" class="list-group-item list-group-item-action">Topup</a>
     <a href="transaction_logs.php" class="list-group-item list-group-item-action">Riwayat Transaksi</a>
+    <a href="statistik.php" class="list-group-item list-group-item-action">Statistik</a>
 </div>
 
 <?php include '../../templates/footer.php'; ?>
