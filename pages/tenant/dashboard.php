@@ -14,12 +14,18 @@ $sql    = "SELECT * FROM users WHERE id=$user_id";
 $result = $conn->query($sql);
 $user   = $result->fetch_assoc();
 ?>
-<h2>Tenant Dashboard</h2>
-<p>Selamat datang, <?= $user['name']; ?>!</p>
-<p>Di sini kamu dapat mengelola produk dan melihat order yang masuk.</p>
 
-<ul>
-    <li><a href="product_list.php">Kelola Produk</a></li>
-    <li><a href="order_list.php">Lihat Order</a></li>
-</ul>
+<div class="row">
+    <div class="col-12">
+        <h2 class="fw-bold text-primary mb-4">Tenant Dashboard</h2>
+        <p>Selamat datang, <?= $user['name']; ?>!</p>
+        <p>Di sini kamu dapat mengelola produk dan melihat order yang masuk.</p>
+
+        <ul>
+            <li><a href="product_list.php">Kelola Produk</a></li>
+            <li><a href="order_list.php">Lihat Order</a></li>
+        </ul>
+    </div>
+</div>
+
 <?php include '../../templates/footer.php'; ?>

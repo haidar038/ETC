@@ -6,7 +6,7 @@ include '../../includes/functions.php';
 
 // Pastikan hanya admin yang dapat mengakses halaman ini
 if (!isset($_SESSION['user_id']) || $_SESSION['user_type'] != 'admin') {
-    header("Location: admin_login.php");
+    header("Location: ../login.php");
     exit();
 }
 
@@ -16,12 +16,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $method = $_POST['method'] ?? '';
 
     if ($method == 'qr_scan') {
-        // Metode: Scan QR menggunakan kamera (token diambil dari scanner)
+        // Proses dari scan QR otomatis
         $qr_token = trim($_POST['qr_token'] ?? '');
         if (empty($qr_token)) {
             $message = "<div class='alert alert-danger'>Gagal membaca token dari QR.</div>";
         } else {
-            // Cari transaksi topup yang pending dengan token tersebut
             $sql = "SELECT * FROM transactions WHERE qr_token = '$qr_token' AND (transaction_type='topup_mandiri' OR transaction_type='topup_admin') AND status='pending'";
             $result = $conn->query($sql);
             if ($result && $result->num_rows > 0) {
@@ -36,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
     } elseif ($method == 'manual_input') {
-        // Metode: Input Manual dengan lookup username
+        // Metode Input Manual
         $username = trim($_POST['username'] ?? '');
         $nominal = filter_input(INPUT_POST, 'nominal', FILTER_VALIDATE_INT);
         if (empty($username) || $nominal === false || $nominal <= 0) {
@@ -58,7 +57,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 if ($stmtInsert->execute()) {
                     // Tampilkan QR Code untuk verifikasi oleh visitor
                     $qr_url = "https://quickchart.io/qr?text=" . urlencode($qr_token) . "&size=200";
-                    $message = "<div class='alert alert-success'>Transaksi topup berhasil dibuat untuk visitor <strong>{$user['name']}</strong>. QR Code untuk verifikasi:<br>
+                    $message = "<div class='alert alert-success'>Transaksi topup berhasil dibuat untuk visitor <strong>{$user['name']}</strong>.<br>
+                                QR Code untuk verifikasi:<br>
                                 <img src='$qr_url' alt='QR Code' class='img-fluid'></div>";
                 } else {
                     $message = "<div class='alert alert-danger'>Gagal membuat transaksi: " . $stmtInsert->error . "</div>";
@@ -74,36 +74,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 ?>
 
 <h2 class="mb-4 text-primary fw-bold">Topup oleh Admin</h2>
-
 <?php if (!empty($message)) echo $message; ?>
 
-<!-- Gunakan Bootstrap Tabs untuk memilih metode topup -->
-<ul class="nav nav-tabs" id="topupTab" role="tablist">
-    <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="qr-tab" data-bs-toggle="tab" data-bs-target="#qr" type="button" role="tab" aria-controls="qr" aria-selected="true">
-            Verifikasi Scan QR
-        </button>
-    </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link" id="manual-tab" data-bs-toggle="tab" data-bs-target="#manual" type="button" role="tab" aria-controls="manual" aria-selected="false">
-            Input Manual
-        </button>
-    </li>
-</ul>
-<div class="tab-content" id="topupTabContent">
-    <!-- Tab 1: Verifikasi Scan QR -->
-    <div class="tab-pane fade show active p-3" id="qr" role="tabpanel" aria-labelledby="qr-tab">
-        <!-- Elemen untuk scan QR menggunakan kamera -->
-        <div id="reader" style="width:300px;"></div>
+<div class="row">
+    <!-- Kolom Kiri: Kamera untuk Scan QR -->
+    <div class="col-md-4">
+        <h4>Scan QR (Verifikasi Topup)</h4>
+        <!-- Container kamera dengan aspect ratio 4:3 -->
+        <div id="reader" style="width:100%; aspect-ratio: 4/3; border:1px solid #ddd;"></div>
+        <div class="mt-2">
+            <button id="startCamera" class="btn btn-secondary">Start Camera</button>
+            <button id="stopCamera" class="btn btn-secondary" style="display:none;">Stop Camera</button>
+        </div>
         <!-- Form tersembunyi untuk mengirim token hasil scan -->
-        <form id="qrForm" method="POST" class="mt-3">
+        <form id="qrForm" method="POST" style="display:none;">
             <input type="hidden" name="method" value="qr_scan">
             <input type="hidden" name="qr_token" id="qr_token">
-            <button type="submit" class="btn btn-primary">Verifikasi Hasil Scan</button>
         </form>
     </div>
-    <!-- Tab 2: Input Manual dengan AJAX Username Lookup -->
-    <div class="tab-pane fade p-3" id="manual" role="tabpanel" aria-labelledby="manual-tab">
+
+    <!-- Kolom Kanan: Input Manual dengan Username Lookup -->
+    <div class="col-md-8">
+        <h4>Input Manual Topup</h4>
         <form method="POST" id="manualForm">
             <input type="hidden" name="method" value="manual_input">
             <div class="mb-3">
@@ -120,41 +112,69 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 </div>
 
-<!-- Sertakan library Html5Qrcode untuk scan QR -->
+<!-- Sertakan library Html5Qrcode -->
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script>
-    // ===================
-    // Metode Scan QR
-    // ===================
+    // Variabel untuk mengelola scanner
+    let html5QrcodeScanner;
+    let scannerActive = false;
+
+    // Fungsi untuk memulai kamera
+    document.getElementById('startCamera').addEventListener('click', function() {
+        if (!scannerActive) {
+            document.getElementById('qrForm').style.display = "block";
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            const config = {
+                fps: 10,
+                qrbox: 250
+            };
+            html5QrcodeScanner.start({
+                facingMode: "environment"
+            }, config, onScanSuccess, onScanFailure);
+            scannerActive = true;
+            document.getElementById('stopCamera').style.display = "inline-block";
+            this.disabled = true;
+        }
+    });
+
+    // Fungsi untuk menghentikan kamera
+    document.getElementById('stopCamera').addEventListener('click', function() {
+        if (scannerActive && html5QrcodeScanner) {
+            html5QrcodeScanner.stop().then(() => {
+                console.log("Scanner stopped.");
+                scannerActive = false;
+                document.getElementById('startCamera').disabled = false;
+                this.style.display = "none";
+            }).catch(err => {
+                console.error("Gagal menghentikan scanner: " + err);
+            });
+        }
+    });
+
+    // Callback ketika QR berhasil di-scan
     function onScanSuccess(decodedText, decodedResult) {
-        // Isi input tersembunyi dengan token yang di-scan
-        document.getElementById('qr_token').value = decodedText;
-        // Berhenti scan setelah token ditemukan
-        html5QrcodeScanner.clear().then(_ => {
-            console.log("Scanner cleared.");
-        }).catch(error => {
-            console.error("Gagal menghentikan scanner.", error);
+        // Hentikan scanner secara otomatis
+        html5QrcodeScanner.stop().then(() => {
+            console.log("Scanner stopped after success.");
+            scannerActive = false;
+            document.getElementById('startCamera').disabled = false;
+            document.getElementById('stopCamera').style.display = "none";
+            // Simpan token ke input tersembunyi
+            document.getElementById('qr_token').value = decodedText;
+            // Langsung submit form tanpa tombol trigger manual
+            document.getElementById('qrForm').submit();
+        }).catch(err => {
+            console.error("Gagal menghentikan scanner: " + err);
         });
     }
 
+    // Callback jika scan gagal (tidak perlu menampilkan error terus-menerus)
     function onScanFailure(error) {
-        // Tidak perlu menampilkan error setiap saat
+        // Dapat diabaikan atau digunakan untuk debugging
+        // console.warn("Scan failure: " + error);
     }
 
-    let html5QrcodeScanner = new Html5Qrcode("reader");
-    const config = {
-        fps: 10,
-        qrbox: 250
-    };
-
-    html5QrcodeScanner.start({
-        facingMode: "environment"
-    }, config, onScanSuccess, onScanFailure);
-
-    // ===================
     // AJAX Username Lookup (Metode Manual)
-    // ===================
-
     document.getElementById('username').addEventListener('keyup', function() {
         const username = this.value.trim();
         const lookupDiv = document.getElementById('usernameLookup');
@@ -164,7 +184,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             return;
         }
 
-        // Menggunakan Fetch API untuk AJAX lookup
         fetch('lookup_username.php?username=' + encodeURIComponent(username))
             .then(response => response.json())
             .then(data => {

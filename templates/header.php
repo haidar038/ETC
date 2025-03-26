@@ -117,4 +117,4 @@ include_once __DIR__ . '/../config/config.php';
     </nav>
 
 
-    <div class="container mt-5 h-100">
+    <div class="container my-5 h-100">

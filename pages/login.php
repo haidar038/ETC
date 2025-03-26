@@ -19,6 +19,8 @@ if (!isset($_SESSION['user_id']) && isset($_COOKIE['remember_me'])) {
         } else {
             $_SESSION['user_id']   = $user['id'];
             $_SESSION['user_type'] = $user['user_type'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['balance'] = $user['points'];
 
             // Regenerate token untuk keamanan tambahan
             $newToken = bin2hex(random_bytes(16));
@@ -64,6 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['user_type'] = $user['user_type'];
                 $_SESSION['username'] = $user['username'];
+                $_SESSION['balance'] = $user['points'];
 
                 if ($remember) {
                     $token = bin2hex(random_bytes(16));

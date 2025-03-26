@@ -33,6 +33,7 @@ $result = $conn->query($sql);
                 <th>Nominal (poin)</th>
                 <th>Status</th>
                 <th>Tanggal</th>
+                <th>Aksi</th>
             </tr>
         </thead>
         <tbody>
@@ -43,6 +44,15 @@ $result = $conn->query($sql);
                     <td><?= number_format($row['nominal'], 0, ',', '.'); ?></td>
                     <td><?= ucfirst($row['status']); ?></td>
                     <td><?= $row['transaction_date']; ?></td>
+                    <td>
+                        <?php if ($row['transaction_type'] == 'purchase' && $row['status'] == 'verified'): ?>
+                            <a href="confirm_payment.php?id=<?= $row['id']; ?>" class="btn btn-sm btn-primary">Konfirmasi Pembayaran</a>
+                        <?php elseif ($row['status'] == 'completed'): ?>
+                            <a href="receipt.php?id=<?= $row['id']; ?>" class="btn btn-sm btn-success">Lihat Bukti Pembayaran</a>
+                        <?php else: ?>
+                            <button class="btn btn-sm btn-secondary" disabled>Menunggu Konfirmasi</button>
+                        <?php endif; ?>
+                    </td>
                 </tr>
             <?php endwhile; ?>
         </tbody>

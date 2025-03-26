@@ -35,32 +35,36 @@ $resultProducts = $conn->query($sqlProducts);
     <?php while ($row = $resultProducts->fetch_assoc()):
         $poin = $row['price'] / 1000; // konversi harga
     ?>
-    <div class="col-md-4">
-        <div class="card mb-3">
-            <?php if ($row['image']): ?>
-            <img src="../../public/assets/uploads/<?= $row['image']; ?>" class="card-img-top" alt="Gambar Produk">
-            <?php endif; ?>
-            <div class="card-body">
-                <h5 class="card-title"><?= $row['product_name']; ?></h5>
-                <p class="card-text"><?= $row['description']; ?></p>
-                <p class="card-text"><strong><?= number_format($poin, 0, ',', '.'); ?> poin</strong></p>
-                <div class="input-group mb-3" style="max-width:150px;">
-                    <input type="number" min="1" value="1" class="form-control quantity" id="qty_<?= $row['id']; ?>">
-                    <span class="input-group-text">pcs</span>
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <?php if ($row['image']): ?>
+                    <img src="../../public/assets/uploads/<?= $row['image']; ?>" class="card-img-top" alt="Gambar Produk">
+                <?php endif; ?>
+                <div class="card-body">
+                    <h5 class="card-title"><?= $row['product_name']; ?></h5>
+                    <p class="card-text"><?= $row['description']; ?></p>
+                    <p class="card-text"><strong><?= number_format($poin, 0, ',', '.'); ?> poin</strong></p>
+                    <div class="input-group mb-3" style="max-width:150px;">
+                        <input type="number" min="1" value="1" class="form-control quantity" id="qty_<?= $row['id']; ?>">
+                        <span class="input-group-text">pcs</span>
+                    </div>
+                    <button class="btn btn-success addToCartBtn" data-id="<?= $row['id']; ?>"
+                        data-name="<?= htmlspecialchars($row['product_name']); ?>" data-price="<?= $poin; ?>">
+                        Add to Cart
+                    </button>
                 </div>
-                <button class="btn btn-success addToCartBtn" data-id="<?= $row['id']; ?>"
-                    data-name="<?= htmlspecialchars($row['product_name']); ?>" data-price="<?= $poin; ?>">
-                    Add to Cart
-                </button>
             </div>
         </div>
-    </div>
     <?php endwhile; ?>
 </div>
 
 <!-- Tombol untuk melihat cart -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#cartModal">
-    View Cart (<span id="cartCount">0</span>)
+<button type="button" class="btn btn-primary position-relative" data-bs-toggle="modal" data-bs-target="#cartModal">
+    View Cart
+    <span id="cartCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+        0
+        <span class="visually-hidden">unread messages</span>
+    </span>
 </button>
 
 <!-- Modal Cart -->
@@ -91,65 +95,65 @@ $resultProducts = $conn->query($sqlProducts);
 </div>
 
 <script>
-// Gunakan object cart untuk menyimpan produk yang dipilih
-let cart = {};
+    // Gunakan object cart untuk menyimpan produk yang dipilih
+    let cart = {};
 
-// Fungsi untuk update tampilan cart
-function updateCartDisplay() {
-    let cartItemsDiv = document.getElementById('cartItems');
-    let cartCount = document.getElementById('cartCount');
-    let cartTotalEl = document.getElementById('cartTotal');
-    let total = 0;
-    let html =
-        '<table class="table"><thead><tr><th>Produk</th><th>Jumlah</th><th>Harga per pcs (poin)</th><th>Subtotal (poin)</th><th>Aksi</th></tr></thead><tbody>';
-    for (let id in cart) {
-        let item = cart[id];
-        let subtotal = item.quantity * item.price;
-        total += subtotal;
-        html += `<tr>
+    // Fungsi untuk update tampilan cart
+    function updateCartDisplay() {
+        let cartItemsDiv = document.getElementById('cartItems');
+        let cartCount = document.getElementById('cartCount');
+        let cartTotalEl = document.getElementById('cartTotal');
+        let total = 0;
+        let html =
+            '<table class="table"><thead><tr><th>Produk</th><th>Jumlah</th><th>Harga per pcs (poin)</th><th>Subtotal (poin)</th><th>Aksi</th></tr></thead><tbody>';
+        for (let id in cart) {
+            let item = cart[id];
+            let subtotal = item.quantity * item.price;
+            total += subtotal;
+            html += `<tr>
                 <td>${item.name}</td>
                 <td>${item.quantity}</td>
                 <td>${item.price}</td>
                 <td>${subtotal}</td>
                 <td><button type="button" class="btn btn-sm btn-danger" onclick="removeFromCart('${id}')">Remove</button></td>
              </tr>`;
-    }
-    html += '</tbody></table>';
-    cartItemsDiv.innerHTML = html;
-    cartCount.innerText = Object.keys(cart).length;
-    cartTotalEl.innerText = total;
-    // Simpan data cart ke field hidden untuk dikirim ke checkout
-    document.getElementById('cartData').value = JSON.stringify(cart);
-}
-
-// Fungsi untuk menambah produk ke cart
-document.querySelectorAll('.addToCartBtn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        let id = this.getAttribute('data-id');
-        let name = this.getAttribute('data-name');
-        let price = parseFloat(this.getAttribute('data-price'));
-        // Ambil nilai quantity dari input yang sesuai
-        let qtyInput = document.getElementById('qty_' + id);
-        let quantity = parseInt(qtyInput.value);
-        if (cart[id]) {
-            cart[id].quantity += quantity;
-        } else {
-            cart[id] = {
-                id,
-                name,
-                price,
-                quantity
-            };
         }
-        updateCartDisplay();
-    });
-});
+        html += '</tbody></table>';
+        cartItemsDiv.innerHTML = html;
+        cartCount.innerText = Object.keys(cart).length;
+        cartTotalEl.innerText = total;
+        // Simpan data cart ke field hidden untuk dikirim ke checkout
+        document.getElementById('cartData').value = JSON.stringify(cart);
+    }
 
-// Fungsi untuk menghapus produk dari cart
-function removeFromCart(id) {
-    delete cart[id];
-    updateCartDisplay();
-}
+    // Fungsi untuk menambah produk ke cart
+    document.querySelectorAll('.addToCartBtn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            let id = this.getAttribute('data-id');
+            let name = this.getAttribute('data-name');
+            let price = parseFloat(this.getAttribute('data-price'));
+            // Ambil nilai quantity dari input yang sesuai
+            let qtyInput = document.getElementById('qty_' + id);
+            let quantity = parseInt(qtyInput.value);
+            if (cart[id]) {
+                cart[id].quantity += quantity;
+            } else {
+                cart[id] = {
+                    id,
+                    name,
+                    price,
+                    quantity
+                };
+            }
+            updateCartDisplay();
+        });
+    });
+
+    // Fungsi untuk menghapus produk dari cart
+    function removeFromCart(id) {
+        delete cart[id];
+        updateCartDisplay();
+    }
 </script>
 
 <?php include '../../templates/footer.php'; ?>
